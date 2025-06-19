@@ -1,0 +1,251 @@
+from zipfile import ZipFile
+from pathlib import Path
+
+# Define file structure and contents
+project_files = {
+    "MainActivity.kt": """package com.example.weatherapp
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val btnEnter = findViewById<Button>(R.id.btnEnter)
+        val btnExit = findViewById<Button>(R.id.btnExit)
+
+        btnEnter.setOnClickListener {
+            val intent = Intent(this, WeatherMainScreen::class.java)
+            startActivity(intent)
+        }
+
+        btnExit.setOnClickListener {
+            finish()
+        }
+    }
+}
+""",
+    "WeatherMainScreen.kt": """package com.example.weatherapp
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+
+class WeatherMainScreen : AppCompatActivity() {
+
+    private val days = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    private val minTemps = IntArray(7)
+    private val maxTemps = IntArray(7)
+    private val conditions = Array(7) { "" }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_weather_main)
+
+        val btnCalculate = findViewById<Button>(R.id.btnCalculate)
+        val btnDetail = findViewById<Button>(R.id.btnDetail)
+        val btnClear = findViewById<Button>(R.id.btnClear)
+        val btnExit = findViewById<Button>(R.id.btnExit)
+        val txtResult = findViewById<TextView>(R.id.txtResult)
+
+        btnCalculate.setOnClickListener {
+            try {
+                var total = 0.0
+                for (i in days.indices) {
+                    val minId = resources.getIdentifier("minTemp$i", "id", packageName)
+                    val maxId = resources.getIdentifier("maxTemp$i", "id", packageName)
+                    val condId = resources.getIdentifier("condition$i", "id", packageName)
+
+                    val minInput = findViewById<EditText>(minId).text.toString().toInt()
+                    val maxInput = findViewById<EditText>(maxId).text.toString().toInt()
+                    val conditionInput = findViewById<EditText>(condId).text.toString()
+
+                    minTemps[i] = minInput
+                    maxTemps[i] = maxInput
+                    conditions[i] = conditionInput
+
+                    total += (minInput + maxInput) / 2.0
+                }
+                val average = total / 7
+                txtResult.text = "Weekly Average Temp: %.2f°C".format(average)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Please ensure all fields are filled correctly.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnClear.setOnClickListener {
+            for (i in days.indices) {
+                val minId = resources.getIdentifier("minTemp$i", "id", packageName)
+                val maxId = resources.getIdentifier("maxTemp$i", "id", packageName)
+                val condId = resources.getIdentifier("condition$i", "id", packageName)
+
+                findViewById<EditText>(minId).text.clear()
+                findViewById<EditText>(maxId).text.clear()
+                findViewById<EditText>(condId).text.clear()
+            }
+            txtResult.text = ""
+        }
+
+        btnDetail.setOnClickListener {
+            val intent = Intent(this, DetailedViewScreen::class.java)
+            intent.putExtra("minTemps", minTemps)
+            intent.putExtra("maxTemps", maxTemps)
+            intent.putExtra("conditions", conditions)
+            startActivity(intent)
+        }
+
+        btnExit.setOnClickListener {
+            finish()
+        }
+    }
+}
+""",
+    "DetailedViewScreen.kt": """package com.example.weatherapp
+
+import android.os.Bundle
+import android.widget.TextView
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+
+class DetailedViewScreen : AppCompatActivity() {
+
+    private val days = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_detailed_view)
+
+        val txtDetails = findViewById<TextView>(R.id.txtDetails)
+        val btnBack = findViewById<Button>(R.id.btnBack)
+
+        val minTemps = intent.getIntArrayExtra("minTemps") ?: IntArray(7)
+        val maxTemps = intent.getIntArrayExtra("maxTemps") ?: IntArray(7)
+        val conditions = intent.getStringArrayExtra("conditions") ?: Array(7) { "" }
+
+        val builder = StringBuilder()
+        for (i in days.indices) {
+            builder.append("${days[i]} - Min: ${minTemps[i]}°C, Max: ${maxTemps[i]}°C, Condition: ${conditions[i]}\\n")
+        }
+        txtDetails.text = builder.toString()
+
+        btnBack.setOnClickListener {
+            finish()
+        }
+    }
+}
+""",
+    "activity_main.xml": """<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:gravity="center"
+    android:padding="24dp">
+
+    <TextView
+        android:text="Weather App"
+        android:textSize="32sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:text="By: Your Name - Student Number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btnEnter"
+        android:text="Enter App"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/btnExit"
+        android:text="Exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>
+""",
+    "activity_detailed_view.xml": """<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtDetails"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:textSize="16sp"
+        android:scrollbars="vertical" />
+
+    <Button
+        android:id="@+id/btnBack"
+        android:text="Back to Main Screen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
+"""
+}
+
+# Add weather_main.xml dynamically with inputs for 7 days
+inputs = ""
+for i in range(7):
+    inputs += f"""
+            <TextView android:text="Day {i+1}"/>
+            <EditText android:id="@+id/minTemp{i}" android:hint="Min Temp" android:inputType="number"/>
+            <EditText android:id="@+id/maxTemp{i}" android:hint="Max Temp" android:inputType="number"/>
+            <EditText android:id="@+id/condition{i}" android:hint="Weather Condition"/>
+    """
+
+weather_main_xml = f"""<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Enter Weekly Weather Data"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        {inputs}
+
+        <Button android:id="@+id/btnCalculate" android:text="Calculate Average Temp"/>
+        <Button android:id="@+id/btnDetail" android:text="View Detailed Info"/>
+        <Button android:id="@+id/btnClear" android:text="Clear Data"/>
+        <Button android:id="@+id/btnExit" android:text="Exit App"/>
+
+        <TextView android:id="@+id/txtResult" android:layout_marginTop="12dp"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</ScrollView>
+"""
+
+project_files["activity_weather_main.xml"] = weather_main_xml
+
+# Write files to zip
+zip_path = "/mnt/data/WeatherAppKotlinTemplate.zip"
+with ZipFile(zip_path, 'w') as zipf:
+    for filename, content in project_files.items():
+        file_path = Path(filename)
+        zipf.writestr(str(file_path), content)
+
+zip_path
