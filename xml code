@@ -1,0 +1,95 @@
+splash screen                                                                                                                                                                       <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:gravity="center"
+    android:padding="24dp">
+
+    <TextView
+        android:text="Weather App"
+        android:textSize="32sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:text="By: Your Name - Student Number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btnEnter"
+        android:text="Enter App"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/btnExit"
+        android:text="Exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>                                                                                                                                            activity_weather_main.xml (Main Screen)                                                                                                     <?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Enter Weekly Weather Data"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Repeat for 7 days -->
+        <LinearLayout android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <!-- Example: Monday -->
+            <TextView android:text="Monday"/>
+            <EditText android:id="@+id/minTemp0" android:hint="Min Temp" android:inputType="number"/>
+            <EditText android:id="@+id/maxTemp0" android:hint="Max Temp" android:inputType="number"/>
+            <EditText android:id="@+id/condition0" android:hint="Weather Condition"/>
+            <!-- Copy and update index for remaining days (0 to 6) -->
+        </LinearLayout>
+
+        <!-- Buttons and result -->
+        <Button android:id="@+id/btnCalculate" android:text="Calculate Average Temp"/>
+        <Button android:id="@+id/btnDetail" android:text="View Detailed Info"/>
+        <Button android:id="@+id/btnClear" android:text="Clear Data"/>
+        <Button android:id="@+id/btnExit" android:text="Exit App"/>
+
+        <TextView android:id="@+id/txtResult" android:layout_marginTop="12dp"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</ScrollView>
+                        activity_detailed_view.xml (Detailed Screen)                                                                      <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtDetails"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:textSize="16sp"
+        android:scrollbars="vertical" />
+
+    <Button
+        android:id="@+id/btnBack"
+        android:text="Back to Main Screen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
+                  
